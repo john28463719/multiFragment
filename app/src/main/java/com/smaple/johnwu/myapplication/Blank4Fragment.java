@@ -11,15 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Blank3Fragment extends BaseFragment {
+public class Blank4Fragment extends BaseFragment {
 
     private ChildFragment mChildFragment;
 
-    public Blank3Fragment() {
+    public Blank4Fragment() {
         // Required empty public constructor
     }
 
@@ -28,7 +27,7 @@ public class Blank3Fragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null){
             FragmentManager manager = getChildFragmentManager();
-            mChildFragment = ChildFragment.newInstance("I am 3");
+            mChildFragment = ChildFragment.newInstance("I am 4");
             FragmentTransaction fragmentTransaction = manager.beginTransaction();
             fragmentTransaction.add(R.id.container, mChildFragment, "child3");
             fragmentTransaction.addToBackStack("child3");

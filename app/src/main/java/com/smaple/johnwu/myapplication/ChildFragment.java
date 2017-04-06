@@ -36,12 +36,7 @@ public class ChildFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null){
-            mDeepFragment = DeepFragment.newInstance(1);
-        } else {
-            mDeepFragment = (DeepFragment) getFragmentManager().findFragmentByTag("deep");
-        }
-
+        mDeepFragment = DeepFragment.newInstance(1);
     }
 
     @Override

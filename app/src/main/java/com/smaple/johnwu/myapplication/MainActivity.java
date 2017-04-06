@@ -18,8 +18,11 @@ public class MainActivity extends FragmentActivity {
     private static final int FIRST = 0;
     private static final int SECOND = 1;
     private static final int THIRD = 2;
-    private Fragment[] fragments = new Fragment[3];
-    private int prePosition = 0;
+    private static final int FOURTH = 3;
+    private Fragment[] fragments = new Fragment[4];
+    private int prePosition = FIRST;
+    private int[] flowStack = new int[]{2,1,4,3};
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -28,19 +31,24 @@ public class MainActivity extends FragmentActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    showFragment(FIRST);
-//                    showHideFragment(fragments[FIRST], fragments[prePosition]);
+                    showFragment(FIRST, "0");
                     prePosition = FIRST;
+                    addToStack(1, flowStack.length - 1);
                     return true;
                 case R.id.navigation_dashboard:
-                    showFragment(SECOND);
-//                    showHideFragment(fragments[SECOND], fragments[prePosition]);
+                    showFragment(SECOND, "1");
                     prePosition = SECOND;
+                    addToStack(2, flowStack.length - 1);
                     return true;
                 case R.id.navigation_notifications:
-                    showFragment(THIRD);
-//                    showHideFragment(fragments[THIRD], fragments[prePosition]);
+                    showFragment(THIRD, "2");
                     prePosition = THIRD;
+                    addToStack(3, flowStack.length - 1);
+                    return true;
+                case R.id.navigation_notifications4:
+                    showFragment(FOURTH, "3");
+                    prePosition = FOURTH;
+                    addToStack(4, flowStack.length - 1);
                     return true;
             }
             return false;
@@ -57,7 +65,7 @@ public class MainActivity extends FragmentActivity {
 
         if (savedInstanceState == null){
             initialFragment();
-            showRootFragment(FIRST);
+            showRootFragment();
         }else {
             findFragments();
         }
@@ -67,6 +75,49 @@ public class MainActivity extends FragmentActivity {
         fragments[FIRST] = new BlankFragment();
         fragments[SECOND] = new Blank2Fragment();
         fragments[THIRD] = new Blank3Fragment();
+        fragments[FOURTH] = new Blank4Fragment();
+    }
+
+    private void showRootFragment(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(R.id.content, fragments[FIRST], String.valueOf(FIRST));
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+    }
+
+    private void showFragment(int position, String FragTag){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment toFragment = fragments[position];
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        List<Fragment> list = fragmentManager.getFragments();
+        fragmentTransaction.add(R.id.content, toFragment, FragTag);
+        fragmentTransaction.addToBackStack(null);
+        if (list != null){
+            for (Fragment fragment: list) {
+                fragmentTransaction.hide(fragment);
+            }
+        }
+        fragmentTransaction.commit();
+
+        int[] aa = flowStack;
+    }
+
+    private void addToStack(int index, int length){
+        int keep;
+        if (flowStack[length] == index){
+            return;
+        }
+        keep = flowStack[length];
+        flowStack[length] = index;
+        for (int i = length - 1; i >= 0; i--) {
+            int temp = keep;
+            keep = flowStack[i];
+            flowStack[i] = temp;
+            if (keep == index){
+                return;
+            }
+        }
     }
 
     private void showRootFragment(int root){
@@ -87,6 +138,7 @@ public class MainActivity extends FragmentActivity {
         fragments[FIRST] = fragmentManager.findFragmentByTag(String.valueOf(FIRST));
         fragments[SECOND] =fragmentManager.findFragmentByTag(String.valueOf(SECOND));
         fragments[THIRD] = fragmentManager.findFragmentByTag(String.valueOf(THIRD));
+        fragments[FOURTH] = fragmentManager.findFragmentByTag(String.valueOf(FOURTH));
     }
 
     private void showFragment(int position){
@@ -109,33 +161,26 @@ public class MainActivity extends FragmentActivity {
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.getBackStackEntryCount() > 0){
-            Fragment fragment = getActiveFragment(null, fragmentManager);
-            if (fragment != null){
-                if (fragment.getFragmentManager().getBackStackEntryCount() > 1){
-                    fragment.getFragmentManager().popBackStackImmediate();
-                }else {
-                    this.finish();
+        Fragment fragment = getActiveFragment(null, fragmentManager);
+        if (fragment != null) {
+            int count = fragment.getFragmentManager().getBackStackEntryCount();
+            if (fragment.getFragmentManager().getBackStackEntryCount() > 1) {
+                fragment.getFragmentManager().popBackStackImmediate();
+            } else if (fragmentManager.getBackStackEntryCount() > 1) {
+                fragmentManager.popBackStack();
+                for (int i = 0; i < flowStack.length; i++) {
+                    if (prePosition == flowStack[i]){
+                        
+                    }else {
+                        getSupportFragmentManager().beginTransaction().hide(fragments[flowStack[i]]).commit();
+                    }
                 }
+            } else {
+                this.finish();
             }
-
-        } else {
-            super.onBackPressed();
         }
     }
 
-    private Fragment getTopFragment(FragmentManager manager){
-        List<Fragment> fragmentList = manager.getFragments();
-        if (fragmentList == null) return null;
-
-        for (int i = fragmentList.size() - 1; i >= 0; i--) {
-            Fragment fragment = fragmentList.get(i);
-            if (fragment instanceof Fragment) {
-                return  fragment;
-            }
-        }
-        return null;
-    }
 
     private Fragment getActiveFragment(Fragment parentFragment, FragmentManager fragmentManager) {
         List<Fragment> fragmentList = fragmentManager.getFragments();
