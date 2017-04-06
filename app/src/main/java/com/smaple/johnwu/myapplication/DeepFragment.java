@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +17,9 @@ import android.widget.Button;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DeepFragment extends Fragment {
+public class DeepFragment extends BaseFragment {
 
+    private DeepFragment mDeepFragment;
 
     public static DeepFragment newInstance(int count) {
 
@@ -33,6 +35,17 @@ public class DeepFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null){
+            int aa = getArguments().getInt("count");
+            mDeepFragment = DeepFragment.newInstance(++aa);
+        } else {
+            mDeepFragment = (DeepFragment) getFragmentManager().findFragmentByTag("deep"+String.valueOf(getArguments().getInt("count")));
+        }
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -48,13 +61,12 @@ public class DeepFragment extends Fragment {
         getView().findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int aa = getArguments().getInt("count");
-                Fragment fragment = DeepFragment.newInstance(++aa);
                 FragmentManager fragmentManager =  getFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.container, fragment)
-                        .addToBackStack(null)
-                        .commit();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.add(R.id.container, mDeepFragment, "deep");
+                transaction.hide(DeepFragment.this);
+                transaction.addToBackStack("deep");
+                transaction.commit();
             }
         });
     }

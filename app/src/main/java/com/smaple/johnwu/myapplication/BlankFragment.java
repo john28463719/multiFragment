@@ -1,6 +1,7 @@
 package com.smaple.johnwu.myapplication;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,14 +17,28 @@ import android.view.ViewGroup;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class BlankFragment extends Fragment {
+public class BlankFragment extends BaseFragment {
 
-    public FragmentManager manager;
+    private ChildFragment mChildFragment;
 
     public BlankFragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null){
+            FragmentManager manager = getChildFragmentManager();
+            mChildFragment = ChildFragment.newInstance("I am 1");
+            FragmentTransaction fragmentTransaction = manager.beginTransaction();
+            fragmentTransaction.add(R.id.container, mChildFragment, "child1");
+            fragmentTransaction.addToBackStack("child1");
+            fragmentTransaction.commit();
+        } else {
+            mChildFragment = (ChildFragment) getChildFragmentManager().findFragmentByTag("child1");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,14 +50,6 @@ public class BlankFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        FragmentManager testManager = getFragmentManager();
-        manager = getChildFragmentManager();
-        Fragment fragment = ChildFragment.newInstance("I am 1");
-        FragmentTransaction fragmentTransaction = manager.beginTransaction();
-        fragmentTransaction
-                .add(R.id.container, fragment)
-                .addToBackStack(null)
-                .commit();
-//        loadRootFragment(R.id.container, fragment);
     }
+
 }

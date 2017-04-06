@@ -16,8 +16,9 @@ import android.widget.TextView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ChildFragment extends Fragment {
+public class ChildFragment extends BaseFragment {
 
+    private DeepFragment mDeepFragment;
 
     public static ChildFragment newInstance(String name) {
 
@@ -32,6 +33,16 @@ public class ChildFragment extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null){
+            mDeepFragment = DeepFragment.newInstance(1);
+        } else {
+            mDeepFragment = (DeepFragment) getFragmentManager().findFragmentByTag("deep");
+        }
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -55,12 +66,11 @@ public class ChildFragment extends Fragment {
     }
 
     private void gotoDeep(){
-        DeepFragment fragment = DeepFragment.newInstance(1);
         FragmentManager manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction
-                .replace(R.id.container, fragment)
-                .addToBackStack(null)
-                .commit();
+        transaction.add(R.id.container, mDeepFragment, "deep");
+        transaction.hide(ChildFragment.this);
+        transaction.addToBackStack("deep");
+        transaction.commit();
     }
 }

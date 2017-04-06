@@ -15,13 +15,28 @@ import android.view.ViewGroup;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class Blank3Fragment extends Fragment {
+public class Blank3Fragment extends BaseFragment {
 
+    private ChildFragment mChildFragment;
 
     public Blank3Fragment() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null){
+            FragmentManager manager = getChildFragmentManager();
+            mChildFragment = ChildFragment.newInstance("I am 3");
+            FragmentTransaction fragmentTransaction = manager.beginTransaction();
+            fragmentTransaction.add(R.id.container, mChildFragment, "child3");
+            fragmentTransaction.addToBackStack("child3");
+            fragmentTransaction.commit();
+        } else {
+            mChildFragment = (ChildFragment) getChildFragmentManager().findFragmentByTag("child1");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -30,16 +45,4 @@ public class Blank3Fragment extends Fragment {
         return inflater.inflate(R.layout.fragment_blank3, container, false);
     }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        FragmentManager manager = getChildFragmentManager();
-        Fragment fragment = ChildFragment.newInstance("I am 3");
-        FragmentTransaction fragmentTransaction = manager.beginTransaction();
-        fragmentTransaction
-                .add(R.id.container, fragment)
-                .addToBackStack(null)
-                .commit();
-//        loadRootFragment(R.id.container, fragment);
-    }
 }

@@ -54,8 +54,13 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         navigationView = (BottomNavigationView) findViewById(R.id.navigation);
         navigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        initialFragment();
-        showRootFragment(FIRST);
+
+        if (savedInstanceState == null){
+            initialFragment();
+            showRootFragment(FIRST);
+        }else {
+            findFragments();
+        }
     }
 
     private void initialFragment(){
@@ -69,11 +74,19 @@ public class MainActivity extends FragmentActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         for (int i = 0; i < fragments.length; i++) {
             fragmentTransaction.add(R.id.content, fragments[i], String.valueOf(i));
+            fragmentTransaction.addToBackStack(null);
             if (i != root){
                 fragmentTransaction.hide(fragments[i]);
             }
         }
         fragmentTransaction.commit();
+    }
+
+    private void findFragments(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragments[FIRST] = fragmentManager.findFragmentByTag(String.valueOf(FIRST));
+        fragments[SECOND] =fragmentManager.findFragmentByTag(String.valueOf(SECOND));
+        fragments[THIRD] = fragmentManager.findFragmentByTag(String.valueOf(THIRD));
     }
 
     private void showFragment(int position){
@@ -95,16 +108,49 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public void onBackPressed() {
-        BlankFragment fragment = (BlankFragment) fragments[0];
-        FragmentManager manager = fragment.getChildFragmentManager();
-        if (manager.getBackStackEntryCount() > 1){
-            manager.popBackStack();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 0){
+            Fragment fragment = getActiveFragment(null, fragmentManager);
+            if (fragment != null){
+                if (fragment.getFragmentManager().getBackStackEntryCount() > 1){
+                    fragment.getFragmentManager().popBackStackImmediate();
+                }else {
+                    this.finish();
+                }
+            }
+
         } else {
             super.onBackPressed();
         }
-
-
     }
 
+    private Fragment getTopFragment(FragmentManager manager){
+        List<Fragment> fragmentList = manager.getFragments();
+        if (fragmentList == null) return null;
 
+        for (int i = fragmentList.size() - 1; i >= 0; i--) {
+            Fragment fragment = fragmentList.get(i);
+            if (fragment instanceof Fragment) {
+                return  fragment;
+            }
+        }
+        return null;
+    }
+
+    private Fragment getActiveFragment(Fragment parentFragment, FragmentManager fragmentManager) {
+        List<Fragment> fragmentList = fragmentManager.getFragments();
+        if (fragmentList == null) {
+            return parentFragment;
+        }
+        for (int i = fragmentList.size() - 1; i >= 0; i--) {
+            Fragment fragment = fragmentList.get(i);
+            if (fragment instanceof Fragment) {
+                Fragment supportFragment = fragment;
+                if (supportFragment.isResumed() && !supportFragment.isHidden() && supportFragment.getUserVisibleHint()) {
+                    return getActiveFragment(supportFragment, supportFragment.getChildFragmentManager());
+                }
+            }
+        }
+        return parentFragment;
+    }
 }
