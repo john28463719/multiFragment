@@ -10,6 +10,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends FragmentActivity {
@@ -20,8 +22,9 @@ public class MainActivity extends FragmentActivity {
     private static final int THIRD = 2;
     private static final int FOURTH = 3;
     private Fragment[] fragments = new Fragment[4];
-    private int prePosition = FIRST;
-    private int[] flowStack = new int[]{2,1,4,3};
+    private int currentPosition = FIRST;
+    private int[] flowStack = new int[4];
+    private List<Integer> flowStacks = new ArrayList<>();
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -29,26 +32,28 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            addToStacks(new Integer(currentPosition));
+
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    showFragment(FIRST, "0");
-                    prePosition = FIRST;
-                    addToStack(1, flowStack.length - 1);
+                    showFragment(FIRST);
+                    currentPosition = FIRST;
+//                    addToStack(1, flowStack.length - 1);
                     return true;
                 case R.id.navigation_dashboard:
-                    showFragment(SECOND, "1");
-                    prePosition = SECOND;
-                    addToStack(2, flowStack.length - 1);
+                    showFragment(SECOND);
+                    currentPosition = SECOND;
+//                    addToStack(2, flowStack.length - 1);
                     return true;
                 case R.id.navigation_notifications:
-                    showFragment(THIRD, "2");
-                    prePosition = THIRD;
-                    addToStack(3, flowStack.length - 1);
+                    showFragment(THIRD);
+                    currentPosition = THIRD;
+//                    addToStack(3, flowStack.length - 1);
                     return true;
                 case R.id.navigation_notifications4:
-                    showFragment(FOURTH, "3");
-                    prePosition = FOURTH;
-                    addToStack(4, flowStack.length - 1);
+                    showFragment(FOURTH);
+                    currentPosition = FOURTH;
+//                    addToStack(4, flowStack.length - 1);
                     return true;
             }
             return false;
@@ -65,7 +70,7 @@ public class MainActivity extends FragmentActivity {
 
         if (savedInstanceState == null){
             initialFragment();
-            showRootFragment();
+            showRootFragment(FIRST);
         }else {
             findFragments();
         }
@@ -99,8 +104,16 @@ public class MainActivity extends FragmentActivity {
             }
         }
         fragmentTransaction.commit();
+    }
 
-        int[] aa = flowStack;
+    private void addToStacks(Integer position){
+        if (flowStacks.contains(position)) {
+            int index = flowStacks.indexOf(position);
+            flowStacks.remove(index);
+            flowStacks.add(position);
+        } else {
+            flowStacks.add(position);
+        }
     }
 
     private void addToStack(int index, int length){
@@ -121,7 +134,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void showRootFragment(int root){
-        FragmentManager fragmentManager = getSupportFragmentManager();
+        final FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         for (int i = 0; i < fragments.length; i++) {
             fragmentTransaction.add(R.id.content, fragments[i], String.valueOf(i));
@@ -131,12 +144,13 @@ public class MainActivity extends FragmentActivity {
             }
         }
         fragmentTransaction.commit();
+        fragmentManager.executePendingTransactions();
     }
 
     private void findFragments(){
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragments[FIRST] = fragmentManager.findFragmentByTag(String.valueOf(FIRST));
-        fragments[SECOND] =fragmentManager.findFragmentByTag(String.valueOf(SECOND));
+        fragments[SECOND] = fragmentManager.findFragmentByTag(String.valueOf(SECOND));
         fragments[THIRD] = fragmentManager.findFragmentByTag(String.valueOf(THIRD));
         fragments[FOURTH] = fragmentManager.findFragmentByTag(String.valueOf(FOURTH));
     }
@@ -158,6 +172,7 @@ public class MainActivity extends FragmentActivity {
         fragmentTransaction.commit();
     }
 
+
     @Override
     public void onBackPressed() {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -166,15 +181,32 @@ public class MainActivity extends FragmentActivity {
             int count = fragment.getFragmentManager().getBackStackEntryCount();
             if (fragment.getFragmentManager().getBackStackEntryCount() > 1) {
                 fragment.getFragmentManager().popBackStackImmediate();
-            } else if (fragmentManager.getBackStackEntryCount() > 1) {
-                fragmentManager.popBackStack();
-                for (int i = 0; i < flowStack.length; i++) {
-                    if (prePosition == flowStack[i]){
-                        
+            } else if (fragmentManager.getBackStackEntryCount() > 0) {
+//                fragmentManager.popBackStack();
+
+                if (flowStacks.size() > 0) {
+                    getSupportFragmentManager().beginTransaction().hide(fragments[currentPosition]).commit();
+
+                    Integer popFragmentIndex = flowStacks.get(flowStacks.size() - 1);
+                    getSupportFragmentManager().beginTransaction().show(fragments[popFragmentIndex]).commit();
+                    flowStacks.remove(flowStacks.size() - 1);
+
+                    currentPosition = popFragmentIndex;
+                    navigationView.getMenu().getItem(popFragmentIndex).setChecked(true);
+                } else {
+                    this.finish();
+                }
+
+                /*
+                for (int i = 0; i < fragments.length; i++) {
+                    Integer fragmentPosition = flowStacks.get(i);
+                    if (i != (flowStacks.size() - 1)) {
+                        getSupportFragmentManager().beginTransaction().hide(fragments[fragmentPosition]).commit();
                     }else {
-                        getSupportFragmentManager().beginTransaction().hide(fragments[flowStack[i]]).commit();
+                        getSupportFragmentManager().beginTransaction().show(fragments[fragmentPosition]).commit();
                     }
                 }
+                */
             } else {
                 this.finish();
             }

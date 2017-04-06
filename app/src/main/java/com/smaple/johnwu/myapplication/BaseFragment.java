@@ -37,10 +37,8 @@ public abstract class BaseFragment extends Fragment {
         if (savedInstanceState != null) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             if (isSupportHidden()) {
-                Fragment fragment = this;
                 ft.hide(this);
             } else {
-                Fragment fragment = this;
                 ft.show(this);
             }
             ft.commit();
