@@ -17,27 +17,30 @@ import android.view.ViewGroup;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class BlankFragment extends BaseFragment {
+public class BlankFragment extends ContainerFragment {
 
-    private ChildFragment mChildFragment;
+
+    public static BlankFragment newInstance(int pageIndex) {
+        Bundle args = new Bundle();
+        args.putInt("pageIndex", pageIndex);
+        BlankFragment fragment = new BlankFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public BlankFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState == null){
-            FragmentManager manager = getChildFragmentManager();
-            mChildFragment = ChildFragment.newInstance("I am 1");
-            FragmentTransaction fragmentTransaction = manager.beginTransaction();
-            fragmentTransaction.add(R.id.container, mChildFragment, "child1");
-            fragmentTransaction.addToBackStack("child1");
-            fragmentTransaction.commit();
-        } else {
-            mChildFragment = (ChildFragment) getChildFragmentManager().findFragmentByTag("child1");
-        }
+    protected Page getSelfPage() {
+        int index = getArguments().getInt("pageIndex");
+        return Page.findByIndex(index);
+    }
+
+    @Override
+    protected int getContainerLayout() {
+        return R.id.container;
     }
 
     @Override

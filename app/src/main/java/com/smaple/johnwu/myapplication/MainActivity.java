@@ -14,29 +14,6 @@ import java.util.List;
 
 public class MainActivity extends FragmentActivity {
 
-    private enum Page{
-        FIRST(0, "first"),
-        SECOND(1, "second"),
-        THIRD(2, "third"),
-        FOURTH(3, "fourth");
-
-        private int index;
-        private String tag;
-
-        private Page(int index, String tag){
-            this.index = index;
-            this.tag = tag;
-        }
-
-        public String getTag() {
-            return tag;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-    }
-
     private BottomNavigationView navigationView;
     private Fragment[] fragments = new Fragment[4];
     private int currentPosition = Page.FIRST.getIndex();
@@ -90,10 +67,10 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void initialFragment(){
-        fragments[Page.FIRST.getIndex()] = new BlankFragment();
-        fragments[Page.SECOND.getIndex()] = new Blank2Fragment();
-        fragments[Page.THIRD.getIndex()] = new Blank3Fragment();
-        fragments[Page.FOURTH.getIndex()] = new Blank4Fragment();
+        fragments[Page.FIRST.getIndex()] = BlankFragment.newInstance(Page.FIRST.getIndex());
+        fragments[Page.SECOND.getIndex()] = BlankFragment.newInstance(Page.SECOND.getIndex());
+        fragments[Page.THIRD.getIndex()] = BlankFragment.newInstance(Page.THIRD.getIndex());
+        fragments[Page.FOURTH.getIndex()] = BlankFragment.newInstance(Page.FOURTH.getIndex());
     }
 
     private void addToStacks(Integer position){
@@ -127,7 +104,7 @@ public class MainActivity extends FragmentActivity {
         final FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         for (int i = 0; i < fragments.length; i++) {
-            fragmentTransaction.add(R.id.content, fragments[i], String.valueOf(i));
+            fragmentTransaction.add(R.id.content, fragments[i], Page.findByIndex(i).getContainerTag());
             fragmentTransaction.addToBackStack(null);
             if (i != rootPage.getIndex()){
                 fragmentTransaction.hide(fragments[i]);
@@ -138,10 +115,10 @@ public class MainActivity extends FragmentActivity {
 
     private void findFragments(){
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragments[Page.FIRST.getIndex()] = fragmentManager.findFragmentByTag(Page.FIRST.getTag());
-        fragments[Page.SECOND.getIndex()] = fragmentManager.findFragmentByTag(String.valueOf(Page.SECOND.getTag()));
-        fragments[Page.THIRD.getIndex()] = fragmentManager.findFragmentByTag(String.valueOf(Page.THIRD.getTag()));
-        fragments[Page.FOURTH.getIndex()] = fragmentManager.findFragmentByTag(String.valueOf(Page.FOURTH.getTag()));
+        fragments[Page.FIRST.getIndex()] = fragmentManager.findFragmentByTag(Page.FIRST.getContainerTag());
+        fragments[Page.SECOND.getIndex()] = fragmentManager.findFragmentByTag(Page.SECOND.getContainerTag());
+        fragments[Page.THIRD.getIndex()] = fragmentManager.findFragmentByTag(Page.THIRD.getContainerTag());
+        fragments[Page.FOURTH.getIndex()] = fragmentManager.findFragmentByTag(Page.FOURTH.getContainerTag());
     }
 
     private void showFragment(Page Page){

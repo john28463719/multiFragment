@@ -3,6 +3,7 @@ package com.smaple.johnwu.myapplication;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 /**
@@ -15,13 +16,11 @@ public abstract class BaseFragment extends Fragment {
     protected boolean mIsHidden = true;
 
 
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (savedInstanceState == null){
-
-        } else {
+        if (savedInstanceState != null){
             mIsHidden = savedInstanceState.getBoolean(FRAGMENTATION_STATE_SAVE_IS_HIDDEN);
             processRestoreInstanceState(savedInstanceState);
         }
@@ -49,3 +48,5 @@ public abstract class BaseFragment extends Fragment {
         return mIsHidden;
     }
 }
+
+

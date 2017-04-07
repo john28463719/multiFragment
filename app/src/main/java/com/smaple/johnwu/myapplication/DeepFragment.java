@@ -63,7 +63,7 @@ public class DeepFragment extends BaseFragment {
             public void onClick(View view) {
                 FragmentManager fragmentManager =  getFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.add(R.id.container, mDeepFragment, "deep");
+                transaction.add(R.id.container, mDeepFragment, "deep" + String.valueOf(getArguments().getInt("count")));
                 transaction.hide(DeepFragment.this);
                 transaction.addToBackStack("deep");
                 transaction.commit();
