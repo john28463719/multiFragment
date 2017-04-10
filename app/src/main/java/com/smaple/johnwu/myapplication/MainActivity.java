@@ -27,23 +27,18 @@ public class MainActivity extends FragmentActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             addToStacks(new Integer(currentPosition));
-
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     showFragment(Page.FIRST);
-                    currentPosition = Page.FIRST.getIndex();
                     return true;
                 case R.id.navigation_dashboard:
                     showFragment(Page.SECOND);
-                    currentPosition = Page.SECOND.getIndex();
                     return true;
                 case R.id.navigation_notifications:
                     showFragment(Page.THIRD);
-                    currentPosition = Page.THIRD.getIndex();
                     return true;
                 case R.id.navigation_notifications4:
                     showFragment(Page.FOURTH);
-                    currentPosition = Page.FOURTH.getIndex();
                     return true;
             }
             return false;
@@ -67,10 +62,9 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void initialFragment(){
-        fragments[Page.FIRST.getIndex()] = BlankFragment.newInstance(Page.FIRST.getIndex());
-        fragments[Page.SECOND.getIndex()] = BlankFragment.newInstance(Page.SECOND.getIndex());
-        fragments[Page.THIRD.getIndex()] = BlankFragment.newInstance(Page.THIRD.getIndex());
-        fragments[Page.FOURTH.getIndex()] = BlankFragment.newInstance(Page.FOURTH.getIndex());
+        for (Page page: Page.values()) {
+            fragments[page.getIndex()] = BlankFragment.newInstance(page.getIndex());
+        }
     }
 
     private void addToStacks(Integer position){
@@ -113,20 +107,21 @@ public class MainActivity extends FragmentActivity {
         fragmentTransaction.commit();
     }
 
+    //when screen rotation will call
     private void findFragments(){
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragments[Page.FIRST.getIndex()] = fragmentManager.findFragmentByTag(Page.FIRST.getContainerTag());
-        fragments[Page.SECOND.getIndex()] = fragmentManager.findFragmentByTag(Page.SECOND.getContainerTag());
-        fragments[Page.THIRD.getIndex()] = fragmentManager.findFragmentByTag(Page.THIRD.getContainerTag());
-        fragments[Page.FOURTH.getIndex()] = fragmentManager.findFragmentByTag(Page.FOURTH.getContainerTag());
+        for (Page page: Page.values()) {
+            fragments[page.getIndex()] = fragmentManager.findFragmentByTag(page.getContainerTag());
+        }
     }
 
-    private void showFragment(Page Page){
+    private void showFragment(Page page){
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().show(fragments[Page.getIndex()]).commit();
-        if (Page.getIndex() != currentPosition){
-            fragmentManager.beginTransaction().hide(fragments[currentPosition]).commit();
-        }
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.hide(fragments[currentPosition]);
+        transaction.show(fragments[page.getIndex()]);
+        transaction.commit();
+        currentPosition = page.getIndex();
     }
 
 
